@@ -1,0 +1,23 @@
+# Use an official Maven image with JDK pre-installed
+FROM maven:3.8.5-openjdk-17 AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy the project files
+COPY . .
+
+# Run Maven to build the project
+RUN mvn clean package
+
+# Second stage to create a lightweight image with only the JAR
+FROM openjdk:17-jdk-alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the jar file from the build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "app.jar"]
